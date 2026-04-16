@@ -1,3 +1,4 @@
+from app.constants import Text
 from app.matrix import MatrixValidator
 
 
@@ -7,9 +8,6 @@ class MacCalculator:
     """
 
     def __init__(self) -> None:
-        """
-        MAC 계산기를 초기화한다.
-        """
         self.validator = MatrixValidator()
 
     def mac(
@@ -19,22 +17,12 @@ class MacCalculator:
     ) -> float:
         """
         두 NxN 행렬에 대해 MAC 연산을 수행한다.
-
-        Args:
-            matrix_a: 첫 번째 행렬
-            matrix_b: 두 번째 행렬
-
-        Returns:
-            MAC 점수
-
-        Raises:
-            ValueError: 두 행렬 크기가 맞지 않는 경우
         """
         normalized_a = self.validator.validate_square_matrix(matrix_a)
         normalized_b = self.validator.validate_square_matrix(matrix_b)
 
         if len(normalized_a) != len(normalized_b):
-            raise ValueError("두 행렬의 크기가 다릅니다.")
+            raise ValueError(Text.MATRIX_SIZE_MISMATCH_ERROR)
 
         size = len(normalized_a)
         total = 0.0
