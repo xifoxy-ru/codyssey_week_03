@@ -1,3 +1,4 @@
+
 from app.matrix import MatrixValidator
 
 
@@ -71,7 +72,7 @@ class MatrixInputHandler:
             검증된 행렬
         """
         while True:
-            print(f"\\n{name} ({size}줄 입력, 공백 구분)")
+            print(f"\n{name} ({size}줄 입력, 공백 구분)")
             lines: list[str] = []
 
             for _ in range(size):
