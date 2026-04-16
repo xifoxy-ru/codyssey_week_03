@@ -1,6 +1,6 @@
 class ScoreJudge:
     """
-    점수 비교와 판정을 담당하는 객체 스켈레톤 코드
+    점수 비교와 판정을 담당하는 객체이다.
     """
 
     def __init__(self, epsilon: float = 1e-9) -> None:
@@ -23,4 +23,10 @@ class ScoreJudge:
         Returns:
             판정 결과 문자열
         """
-        pass
+        if abs(score_a - score_b) < self.epsilon:
+            return "UNDECIDED"
+
+        if score_a > score_b:
+            return "A"
+
+        return "B"

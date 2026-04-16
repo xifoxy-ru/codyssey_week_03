@@ -1,6 +1,6 @@
 class LabelNormalizer:
     """
-    라벨 정규화를 담당하는 객체 스켈레톤 코드
+    라벨 정규화를 담당하는 객체이다.
     """
 
     def normalize_label(self, label: str) -> str:
@@ -21,4 +21,12 @@ class LabelNormalizer:
         Raises:
             ValueError: 지원하지 않는 라벨인 경우
         """
-        pass
+        value = str(label).strip().lower()
+
+        if value in {"+", "cross"}:
+            return "Cross"
+
+        if value == "x":
+            return "X"
+
+        raise ValueError(f"지원하지 않는 라벨입니다: {label}")
