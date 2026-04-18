@@ -1,6 +1,7 @@
 class AppConfig:
     """애플리케이션 전역 설정 상수"""
 
+    BENCHMARK_TABLE_SIZES = (3, 5, 13, 25)
     DEFAULT_DATA_FILE = "data/data.json"
     DEFAULT_INPUT_SIZE = 3
     DEFAULT_BENCHMARK_REPEAT = 10
@@ -82,6 +83,7 @@ class Text:
     JSON_PATTERN_EXPECTED_MISSING = "패턴 expected 누락"
     JSON_PATTERN_SIZE_MISMATCH = "패턴 크기와 키의 size 값이 일치하지 않습니다."
     JSON_LOAD_SECTION = "\n#---------------------------------------\n# [1] 필터 로드\n#---------------------------------------"
+    JSON_PATTERN_STAGE = "\n#---------------------------------------\n# [2] 패턴 분석 (라벨 정규화 적용)\n#---------------------------------------"
     JSON_FILTER_LOADED = "✓ {size_key:<7} 필터 로드 완료 (Cross, X)"
     JSON_REASON_UNDECIDED = "동점(UNDECIDED) 처리 규칙에 따라 FAIL"
     JSON_REASON_MISMATCH = "예측값({predicted})과 expected({expected}) 불일치"
@@ -104,6 +106,7 @@ class Text:
     BENCHMARK_SECTION = "\n# [성능 분석]"
     BENCHMARK_HEADER = "크기\t평균 시간(ms)\t연산 횟수"
     BENCHMARK_ROW = "{size}x{size}\t{avg_ms:.6f}\t{operation_count}"
+    BENCHMARK_ROW_EMPTY = "{size}x{size}\t-\t{operation_count}"
 
     BENCHMARK_REPEAT_ERROR = "repeat는 1 이상이어야 합니다."
     LABEL_INVALID_ERROR = "지원하지 않는 라벨입니다: {label}"
