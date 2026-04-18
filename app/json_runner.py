@@ -37,6 +37,16 @@ class JsonPatternRunner:
             raise ValueError(Text.JSON_TOP_LEVEL_ERROR)
 
         return data
+    
+    def print_filter_load_stage(self, filters: dict[str, Any]) -> None:
+        print(Text.JSON_LOAD_SECTION)
+
+        for size_key, filter_value in filters.items():
+            if not isinstance(filter_value, dict):
+                continue
+
+            if LabelValue.CROSS in filter_value and LabelValue.X in filter_value:
+                print(Text.JSON_FILTER_LOADED.format(size_key=size_key))
 
     def extract_size_from_pattern_key(self, key: str) -> int:
         match = re.fullmatch(PatternRule.PATTERN_KEY_REGEX, key)
@@ -189,6 +199,8 @@ class JsonPatternRunner:
         if not isinstance(patterns, dict):
             print(Text.JSON_PATTERNS_REQUIRED)
             return
+
+        self.print_filter_load_stage(filters)
 
         results: list[dict[str, Any]] = []
 

@@ -80,6 +80,8 @@ class Text:
     JSON_PATTERN_INPUT_MISSING = "패턴 input 누락"
     JSON_PATTERN_EXPECTED_MISSING = "패턴 expected 누락"
     JSON_PATTERN_SIZE_MISMATCH = "패턴 크기와 키의 size 값이 일치하지 않습니다."
+    JSON_LOAD_SECTION = "\n#---------------------------------------\n# [1] 필터 로드\n#---------------------------------------"
+    JSON_FILTER_LOADED = "✓ {size_key:<7} 필터 로드 완료 (Cross, X)"
 
     JSON_PATTERN_SECTION = "\n--- {pattern_key} ---"
     JSON_SCORE_CROSS = "Cross 점수: {score}"
