@@ -3,6 +3,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from app.benchmark import MacBenchmark
 from app.judge import ScoreJudge
 from app.labels import LabelNormalizer
 from app.mac import MacCalculator
@@ -26,21 +27,11 @@ class JsonPatternRunner:
         self.calculator = MacCalculator()
         self.judge = ScoreJudge()
         self.normalizer = LabelNormalizer()
+        self.benchmark = MacBenchmark()
 
     def load_json_file(self, path: str | Path) -> dict[str, Any]:
         """
         JSON 파일을 로드한다.
-
-        Args:
-            path: JSON 파일 경로
-
-        Returns:
-            로드한 JSON 객체
-
-        Raises:
-            FileNotFoundError: 파일이 없는 경우
-            ValueError: 구조가 잘못된 경우
-            json.JSONDecodeError: JSON 파싱에 실패한 경우
         """
         file_path = Path(path)
 
@@ -58,18 +49,6 @@ class JsonPatternRunner:
     def extract_size_from_pattern_key(self, key: str) -> int:
         """
         패턴 키에서 size 값을 추출한다.
-
-        예:
-            size_5_1 -> 5
-
-        Args:
-            key: 패턴 키 문자열
-
-        Returns:
-            추출한 크기 값
-
-        Raises:
-            ValueError: 키 형식이 잘못된 경우
         """
         match = re.fullmatch(r"size_(\d+)_(\d+)", key)
 
@@ -85,16 +64,6 @@ class JsonPatternRunner:
     ) -> tuple[list[list[float]], list[list[float]]]:
         """
         주어진 크기에 맞는 Cross / X 필터를 반환한다.
-
-        Args:
-            filters: filters 데이터
-            size: 필터 크기
-
-        Returns:
-            (cross_filter, x_filter)
-
-        Raises:
-            ValueError: 필터가 없거나 구조가 잘못된 경우
         """
         size_key = f"size_{size}"
 
@@ -125,17 +94,6 @@ class JsonPatternRunner:
     ) -> dict[str, Any]:
         """
         단일 패턴 케이스를 분석한다.
-
-        Args:
-            pattern_key: 패턴 키
-            pattern_data: 패턴 데이터
-            filters: 전체 필터 데이터
-
-        Returns:
-            분석 결과 dict
-
-        Raises:
-            ValueError: 데이터가 잘못된 경우
         """
         if not isinstance(pattern_data, dict):
             raise ValueError("패턴 데이터 구조는 객체(dict)여야 합니다.")
@@ -167,6 +125,8 @@ class JsonPatternRunner:
         else:
             predicted = "UNDECIDED"
 
+        average_ms = self.benchmark.benchmark_mac(input_matrix, cross_filter)
+
         return {
             "pattern_key": pattern_key,
             "size": size,
@@ -175,14 +135,12 @@ class JsonPatternRunner:
             "predicted": predicted,
             "expected": expected,
             "pass": predicted == expected,
+            "average_ms": average_ms,
         }
 
     def print_json_summary(self, results: list[dict[str, Any]]) -> None:
         """
         JSON 분석 결과 요약을 출력한다.
-
-        Args:
-            results: 분석 결과 목록
         """
         total = len(results)
         passed = sum(1 for item in results if item["pass"])
@@ -201,6 +159,32 @@ class JsonPatternRunner:
                         f"- {item['pattern_key']}: "
                         f"predicted={item['predicted']}, expected={item['expected']}"
                     )
+
+    def print_benchmark_summary(self, results: list[dict[str, Any]]) -> None:
+        """
+        크기별 성능 요약을 출력한다.
+        """
+        grouped: dict[int, list[float]] = {}
+
+        for item in results:
+            size = item.get("size")
+            average_ms = item.get("average_ms")
+
+            if size is None or average_ms is None:
+                continue
+
+            grouped.setdefault(size, []).append(average_ms)
+
+        if not grouped:
+            return
+
+        print("\n# [성능 분석]")
+        print("크기\t평균 시간(ms)\t연산 횟수")
+
+        for size in sorted(grouped):
+            avg_ms = sum(grouped[size]) / len(grouped[size])
+            operation_count = size * size
+            print(f"{size}x{size}\t{avg_ms:.6f}\t{operation_count}")
 
     def run(self) -> None:
         """
@@ -240,6 +224,7 @@ class JsonPatternRunner:
 
                 print(f"Cross 점수: {result['cross_score']}")
                 print(f"X 점수: {result['x_score']}")
+                print(f"평균 시간: {result['average_ms']:.6f} ms")
                 print(
                     f"판정: {result['predicted']} | "
                     f"expected: {result['expected']} | {status}"
@@ -256,7 +241,9 @@ class JsonPatternRunner:
                         "predicted": "ERROR",
                         "expected": "UNKNOWN",
                         "pass": False,
+                        "average_ms": None,
                     }
                 )
 
+        self.print_benchmark_summary(results)
         self.print_json_summary(results)
