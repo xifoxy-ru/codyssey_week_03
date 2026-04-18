@@ -25,7 +25,7 @@ def run_user_input_mode() -> None:
     handler = MatrixInputHandler()
     calculator = MacCalculator()
 
-    print("\\n=== 사용자 입력 모드 (3x3) ===")
+    print("\n=== 사용자 입력 모드 (3x3) ===")
 
     filter_a = handler.prompt_matrix("필터 A", 3)
     filter_b = handler.prompt_matrix("필터 B", 3)
@@ -34,7 +34,7 @@ def run_user_input_mode() -> None:
     score_a = calculator.mac(pattern, filter_a)
     score_b = calculator.mac(pattern, filter_b)
 
-    print("\\n# [결과]")
+    print("\n# [결과]")
     print(f"A 점수: {score_a}")
     print(f"B 점수: {score_b}")
 
