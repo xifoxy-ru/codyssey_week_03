@@ -93,7 +93,7 @@ class Text:
     SUMMARY_PASS = "통과: {passed}개"
     SUMMARY_FAIL = "실패: {failed}개"
     SUMMARY_FAIL_CASES = "\n실패 케이스:"
-    SUMMARY_FAIL_ITEM = "- {pattern_key}: predicted={predicted}, expected={expected}"
+    SUMMARY_FAIL_ITEM = "- {pattern_key}: {reason}"
 
     BENCHMARK_SECTION = "\n# [성능 분석]"
     BENCHMARK_HEADER = "크기\t평균 시간(ms)\t연산 횟수"

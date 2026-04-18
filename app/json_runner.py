@@ -119,6 +119,7 @@ class JsonPatternRunner:
             "expected": expected,
             "pass": predicted == expected,
             "average_ms": average_ms,
+            "reason": "",
         }
 
     def print_json_summary(self, results: list[dict[str, Any]]) -> None:
@@ -138,8 +139,7 @@ class JsonPatternRunner:
                     print(
                         Text.SUMMARY_FAIL_ITEM.format(
                             pattern_key=item["pattern_key"],
-                            predicted=item["predicted"],
-                            expected=item["expected"],
+                            reason=item["reason"],
                         )
                     )
 
@@ -211,7 +211,6 @@ class JsonPatternRunner:
                         status=status,
                     )
                 )
-
             except ValueError as exc:
                 print(Text.JSON_FAIL.format(error=exc))
                 results.append(
@@ -224,6 +223,7 @@ class JsonPatternRunner:
                         "expected": "UNKNOWN",
                         "pass": False,
                         "average_ms": None,
+                        "reason": str(exc),
                     }
                 )
 
