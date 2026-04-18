@@ -1,3 +1,6 @@
+from app.constants import LabelValue, Text
+
+
 class LabelNormalizer:
     """
     라벨 정규화를 담당하는 객체이다.
@@ -6,27 +9,13 @@ class LabelNormalizer:
     def normalize_label(self, label: str) -> str:
         """
         입력 라벨을 내부 표준 라벨로 정규화한다.
-
-        예:
-            '+' -> 'Cross'
-            'cross' -> 'Cross'
-            'x' -> 'X'
-
-        Args:
-            label: 원본 라벨 문자열
-
-        Returns:
-            정규화된 라벨 문자열
-
-        Raises:
-            ValueError: 지원하지 않는 라벨인 경우
         """
         value = str(label).strip().lower()
 
-        if value in {"+", "cross"}:
-            return "Cross"
+        if value in {LabelValue.LABEL_PLUS, LabelValue.LABEL_CROSS_LOWER}:
+            return LabelValue.CROSS
 
-        if value == "x":
-            return "X"
+        if value == LabelValue.LABEL_X_LOWER:
+            return LabelValue.X
 
-        raise ValueError(f"지원하지 않는 라벨입니다: {label}")
+        raise ValueError(Text.LABEL_INVALID_ERROR.format(label=label))

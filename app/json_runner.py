@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Any
 
 from app.benchmark import MacBenchmark
+from app.constants import AppConfig, JsonKey, LabelValue, PatternRule, Text
 from app.judge import ScoreJudge
 from app.labels import LabelNormalizer
 from app.mac import MacCalculator
@@ -15,13 +16,7 @@ class JsonPatternRunner:
     JSON 기반 패턴 분석 객체이다.
     """
 
-    def __init__(self, data_file: str = "data.json") -> None:
-        """
-        JSON 러너를 초기화한다.
-
-        Args:
-            data_file: 사용할 JSON 파일 경로
-        """
+    def __init__(self, data_file: str = AppConfig.DEFAULT_DATA_FILE) -> None:
         self.data_file = data_file
         self.validator = MatrixValidator()
         self.calculator = MacCalculator()
@@ -30,30 +25,24 @@ class JsonPatternRunner:
         self.benchmark = MacBenchmark()
 
     def load_json_file(self, path: str | Path) -> dict[str, Any]:
-        """
-        JSON 파일을 로드한다.
-        """
         file_path = Path(path)
 
         if not file_path.exists():
-            raise FileNotFoundError(f"파일을 찾을 수 없습니다: {file_path}")
+            raise FileNotFoundError(Text.JSON_FILE_NOT_FOUND.format(path=file_path))
 
-        with file_path.open("r", encoding="utf-8") as file:
+        with file_path.open("r", encoding=AppConfig.ENCODING) as file:
             data = json.load(file)
 
         if not isinstance(data, dict):
-            raise ValueError("JSON 최상위 구조는 객체(dict)여야 합니다.")
+            raise ValueError(Text.JSON_TOP_LEVEL_ERROR)
 
         return data
 
     def extract_size_from_pattern_key(self, key: str) -> int:
-        """
-        패턴 키에서 size 값을 추출한다.
-        """
-        match = re.fullmatch(r"size_(\d+)_(\d+)", key)
+        match = re.fullmatch(PatternRule.PATTERN_KEY_REGEX, key)
 
         if not match:
-            raise ValueError(f"패턴 키 형식 오류: {key}")
+            raise ValueError(Text.JSON_PATTERN_KEY_ERROR.format(key=key))
 
         return int(match.group(1))
 
@@ -62,27 +51,24 @@ class JsonPatternRunner:
         filters: dict[str, Any],
         size: int,
     ) -> tuple[list[list[float]], list[list[float]]]:
-        """
-        주어진 크기에 맞는 Cross / X 필터를 반환한다.
-        """
-        size_key = f"size_{size}"
+        size_key = PatternRule.SIZE_KEY_TEMPLATE.format(size=size)
 
         if size_key not in filters:
-            raise ValueError(f"필터 누락: {size_key}")
+            raise ValueError(Text.JSON_FILTER_MISSING.format(size_key=size_key))
 
         size_filters = filters[size_key]
 
         if not isinstance(size_filters, dict):
-            raise ValueError(f"필터 구조 오류: {size_key}")
+            raise ValueError(Text.JSON_FILTER_STRUCTURE_ERROR.format(size_key=size_key))
 
-        if "Cross" not in size_filters or "X" not in size_filters:
-            raise ValueError(f"필터 라벨 누락: {size_key}")
+        if LabelValue.CROSS not in size_filters or LabelValue.X not in size_filters:
+            raise ValueError(Text.JSON_FILTER_LABEL_MISSING.format(size_key=size_key))
 
-        cross_filter = self.validator.validate_square_matrix(size_filters["Cross"])
-        x_filter = self.validator.validate_square_matrix(size_filters["X"])
+        cross_filter = self.validator.validate_square_matrix(size_filters[LabelValue.CROSS])
+        x_filter = self.validator.validate_square_matrix(size_filters[LabelValue.X])
 
         if len(cross_filter) != size or len(x_filter) != size:
-            raise ValueError(f"필터 크기 불일치: {size_key}")
+            raise ValueError(Text.JSON_FILTER_SIZE_MISMATCH.format(size_key=size_key))
 
         return cross_filter, x_filter
 
@@ -92,24 +78,21 @@ class JsonPatternRunner:
         pattern_data: dict[str, Any],
         filters: dict[str, Any],
     ) -> dict[str, Any]:
-        """
-        단일 패턴 케이스를 분석한다.
-        """
         if not isinstance(pattern_data, dict):
-            raise ValueError("패턴 데이터 구조는 객체(dict)여야 합니다.")
+            raise ValueError(Text.JSON_PATTERN_STRUCTURE_ERROR)
 
-        if "input" not in pattern_data:
-            raise ValueError("패턴 input 누락")
+        if JsonKey.INPUT not in pattern_data:
+            raise ValueError(Text.JSON_PATTERN_INPUT_MISSING)
 
-        if "expected" not in pattern_data:
-            raise ValueError("패턴 expected 누락")
+        if JsonKey.EXPECTED not in pattern_data:
+            raise ValueError(Text.JSON_PATTERN_EXPECTED_MISSING)
 
         size = self.extract_size_from_pattern_key(pattern_key)
-        input_matrix = self.validator.validate_square_matrix(pattern_data["input"])
-        expected = self.normalizer.normalize_label(pattern_data["expected"])
+        input_matrix = self.validator.validate_square_matrix(pattern_data[JsonKey.INPUT])
+        expected = self.normalizer.normalize_label(pattern_data[JsonKey.EXPECTED])
 
         if len(input_matrix) != size:
-            raise ValueError("패턴 크기와 키의 size 값이 일치하지 않습니다.")
+            raise ValueError(Text.JSON_PATTERN_SIZE_MISMATCH)
 
         cross_filter, x_filter = self.resolve_filter_pair(filters, size)
 
@@ -118,12 +101,12 @@ class JsonPatternRunner:
 
         winner = self.judge.judge_scores(cross_score, x_score)
 
-        if winner == "A":
-            predicted = "Cross"
-        elif winner == "B":
-            predicted = "X"
+        if winner == LabelValue.RESULT_A:
+            predicted = LabelValue.CROSS
+        elif winner == LabelValue.RESULT_B:
+            predicted = LabelValue.X
         else:
-            predicted = "UNDECIDED"
+            predicted = LabelValue.UNDECIDED
 
         average_ms = self.benchmark.benchmark_mac(input_matrix, cross_filter)
 
@@ -139,31 +122,28 @@ class JsonPatternRunner:
         }
 
     def print_json_summary(self, results: list[dict[str, Any]]) -> None:
-        """
-        JSON 분석 결과 요약을 출력한다.
-        """
         total = len(results)
         passed = sum(1 for item in results if item["pass"])
         failed = total - passed
 
-        print("\n# [결과 요약]")
-        print(f"총 테스트: {total}개")
-        print(f"통과: {passed}개")
-        print(f"실패: {failed}개")
+        print(Text.SUMMARY_SECTION)
+        print(Text.SUMMARY_TOTAL.format(total=total))
+        print(Text.SUMMARY_PASS.format(passed=passed))
+        print(Text.SUMMARY_FAIL.format(failed=failed))
 
         if failed:
-            print("\n실패 케이스:")
+            print(Text.SUMMARY_FAIL_CASES)
             for item in results:
                 if not item["pass"]:
                     print(
-                        f"- {item['pattern_key']}: "
-                        f"predicted={item['predicted']}, expected={item['expected']}"
+                        Text.SUMMARY_FAIL_ITEM.format(
+                            pattern_key=item["pattern_key"],
+                            predicted=item["predicted"],
+                            expected=item["expected"],
+                        )
                     )
 
     def print_benchmark_summary(self, results: list[dict[str, Any]]) -> None:
-        """
-        크기별 성능 요약을 출력한다.
-        """
         grouped: dict[int, list[float]] = {}
 
         for item in results:
@@ -178,60 +158,62 @@ class JsonPatternRunner:
         if not grouped:
             return
 
-        print("\n# [성능 분석]")
-        print("크기\t평균 시간(ms)\t연산 횟수")
+        print(Text.BENCHMARK_SECTION)
+        print(Text.BENCHMARK_HEADER)
 
         for size in sorted(grouped):
             avg_ms = sum(grouped[size]) / len(grouped[size])
             operation_count = size * size
-            print(f"{size}x{size}\t{avg_ms:.6f}\t{operation_count}")
+            print(
+                Text.BENCHMARK_ROW.format(
+                    size=size,
+                    avg_ms=avg_ms,
+                    operation_count=operation_count,
+                )
+            )
 
     def run(self) -> None:
-        """
-        data.json 분석 전체 흐름을 실행한다.
-        """
         try:
             data = self.load_json_file(self.data_file)
         except (FileNotFoundError, ValueError, json.JSONDecodeError) as exc:
-            print(f"JSON 로드 실패: {exc}")
+            print(Text.JSON_LOAD_FAIL.format(error=exc))
             return
 
-        filters = data.get("filters")
-        patterns = data.get("patterns")
+        filters = data.get(JsonKey.FILTERS)
+        patterns = data.get(JsonKey.PATTERNS)
 
         if not isinstance(filters, dict):
-            print("JSON 구조 오류: filters 항목이 필요합니다.")
+            print(Text.JSON_FILTERS_REQUIRED)
             return
 
         if not isinstance(patterns, dict):
-            print("JSON 구조 오류: patterns 항목이 필요합니다.")
+            print(Text.JSON_PATTERNS_REQUIRED)
             return
 
         results: list[dict[str, Any]] = []
 
         for pattern_key, pattern_data in patterns.items():
-            print(f"\n--- {pattern_key} ---")
+            print(Text.JSON_PATTERN_SECTION.format(pattern_key=pattern_key))
 
             try:
-                result = self.analyze_single_pattern(
-                    pattern_key,
-                    pattern_data,
-                    filters,
-                )
+                result = self.analyze_single_pattern(pattern_key, pattern_data, filters)
                 results.append(result)
 
                 status = "PASS" if result["pass"] else "FAIL"
 
-                print(f"Cross 점수: {result['cross_score']}")
-                print(f"X 점수: {result['x_score']}")
-                print(f"평균 시간: {result['average_ms']:.6f} ms")
+                print(Text.JSON_SCORE_CROSS.format(score=result["cross_score"]))
+                print(Text.JSON_SCORE_X.format(score=result["x_score"]))
+                print(Text.JSON_AVG_TIME.format(ms=result["average_ms"]))
                 print(
-                    f"판정: {result['predicted']} | "
-                    f"expected: {result['expected']} | {status}"
+                    Text.JSON_STATUS.format(
+                        predicted=result["predicted"],
+                        expected=result["expected"],
+                        status=status,
+                    )
                 )
 
             except ValueError as exc:
-                print(f"FAIL: {exc}")
+                print(Text.JSON_FAIL.format(error=exc))
                 results.append(
                     {
                         "pattern_key": pattern_key,
