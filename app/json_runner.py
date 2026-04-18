@@ -256,6 +256,7 @@ class JsonPatternRunner:
             return
 
         self.print_filter_load_stage(filters)
+        print(Text.JSON_PATTERN_STAGE)
 
         results: list[dict[str, Any]] = []
 
@@ -270,7 +271,6 @@ class JsonPatternRunner:
 
                 print(Text.JSON_SCORE_CROSS.format(score=result["cross_score"]))
                 print(Text.JSON_SCORE_X.format(score=result["x_score"]))
-                print(Text.JSON_AVG_TIME.format(ms=result["average_ms"]))
                 print(
                     Text.JSON_STATUS.format(
                         predicted=result["predicted"],
