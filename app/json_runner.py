@@ -55,6 +55,46 @@ class JsonPatternRunner:
             raise ValueError(Text.JSON_PATTERN_KEY_ERROR.format(key=key))
 
         return int(match.group(1))
+    
+    def validate_required_filters(self, filters: dict[str, Any]) -> bool:
+        is_valid = True
+
+        for size_key in AppConfig.REQUIRED_FILTER_SIZES:
+            if size_key not in filters:
+                print(
+                    Text.JSON_FAIL.format(
+                        error=Text.JSON_REQUIRED_FILTER_MISSING.format(
+                            size_key=size_key
+                        )
+                    )
+                )
+                is_valid = False
+                continue
+
+            filter_value = filters[size_key]
+
+            if not isinstance(filter_value, dict):
+                print(
+                    Text.JSON_FAIL.format(
+                        error=Text.JSON_FILTER_STRUCTURE_ERROR.format(
+                            size_key=size_key
+                        )
+                    )
+                )
+                is_valid = False
+                continue
+
+            if LabelValue.CROSS not in filter_value or LabelValue.X not in filter_value:
+                print(
+                    Text.JSON_FAIL.format(
+                        error=Text.JSON_FILTER_LABEL_MISSING.format(
+                            size_key=size_key
+                        )
+                    )
+                )
+                is_valid = False
+
+        return is_valid
 
     def resolve_filter_pair(
         self,
@@ -198,6 +238,9 @@ class JsonPatternRunner:
 
         if not isinstance(patterns, dict):
             print(Text.JSON_PATTERNS_REQUIRED)
+            return
+        
+        if not self.validate_required_filters(filters):
             return
 
         self.print_filter_load_stage(filters)

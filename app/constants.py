@@ -7,6 +7,7 @@ class AppConfig:
     EPSILON = 1e-9
     ENCODING = "utf-8"
     MILLISECONDS = 1000
+    REQUIRED_FILTER_SIZES = ("size_5", "size_13", "size_25")
 
 
 class JsonKey:
@@ -84,6 +85,7 @@ class Text:
     JSON_FILTER_LOADED = "✓ {size_key:<7} 필터 로드 완료 (Cross, X)"
 
     JSON_PATTERN_SECTION = "\n--- {pattern_key} ---"
+    JSON_REQUIRED_FILTER_MISSING = "필수 필터 누락: {size_key}"
     JSON_SCORE_CROSS = "Cross 점수: {score}"
     JSON_SCORE_X = "X 점수: {score}"
     JSON_AVG_TIME = "평균 시간: {ms:.6f} ms"
