@@ -43,7 +43,7 @@ class LabelValue:
 class Text:
     """출력 문구와 오류 메시지 상수"""
 
-    APP_TITLE = "=== Mini NPU Simulator ==="
+    APP_TITLE = "=== Mini NPU Simulator ===\n"
     MENU_USER_INPUT = "1. 사용자 입력 (3x3)"
     MENU_JSON_ANALYSIS = "2. data.json 분석"
     MENU_PROMPT = "선택: "
@@ -110,3 +110,9 @@ class Text:
 
     BENCHMARK_REPEAT_ERROR = "repeat는 1 이상이어야 합니다."
     LABEL_INVALID_ERROR = "지원하지 않는 라벨입니다: {label}"
+
+    BLOCK_LINE = "#---------------------------------------"
+    MODE_SECTION = "[모드 선택]\n"
+    FILTER_INPUT_SECTION = "# [1] 필터 입력"
+    PATTERN_INPUT_SECTION = "# [2] 패턴 입력"
+    MAC_RESULT_SECTION = "# [3] MAC 결과"
