@@ -58,6 +58,7 @@ class Text:
     INPUT_LINE_COUNT_ERROR = "입력 형식 오류: 총 {size}줄을 입력해야 합니다."
     INPUT_COLUMN_COUNT_ERROR = "입력 형식 오류: 각 줄에 {size}개의 숫자를 입력해야 합니다."
     INPUT_NUMBER_ONLY_ERROR = "입력 형식 오류: 숫자만 입력할 수 있습니다."
+    INPUT_AVG_TIME = "연산 시간(평균/{repeat}회): {ms:.6f} ms"
 
     MATRIX_EMPTY_ERROR = "행렬은 비어 있지 않은 2차원 리스트여야 합니다."
     MATRIX_ROW_TYPE_ERROR = "행렬의 각 행은 리스트여야 합니다."
