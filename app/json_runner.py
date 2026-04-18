@@ -158,6 +158,18 @@ class JsonPatternRunner:
         else:
             predicted = LabelValue.UNDECIDED
 
+        passed = predicted == expected
+
+        if passed:
+            reason = ""
+        elif predicted == LabelValue.UNDECIDED:
+            reason = Text.JSON_REASON_UNDECIDED
+        else:
+            reason = Text.JSON_REASON_MISMATCH.format(
+                predicted=predicted,
+                expected=expected,
+            )
+
         average_ms = self.benchmark.benchmark_mac(input_matrix, cross_filter)
 
         return {
@@ -167,9 +179,9 @@ class JsonPatternRunner:
             "x_score": x_score,
             "predicted": predicted,
             "expected": expected,
-            "pass": predicted == expected,
+            "pass": passed,
             "average_ms": average_ms,
-            "reason": "",
+            "reason": reason,
         }
 
     def print_json_summary(self, results: list[dict[str, Any]]) -> None:

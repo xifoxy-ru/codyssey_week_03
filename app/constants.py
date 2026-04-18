@@ -83,9 +83,11 @@ class Text:
     JSON_PATTERN_SIZE_MISMATCH = "패턴 크기와 키의 size 값이 일치하지 않습니다."
     JSON_LOAD_SECTION = "\n#---------------------------------------\n# [1] 필터 로드\n#---------------------------------------"
     JSON_FILTER_LOADED = "✓ {size_key:<7} 필터 로드 완료 (Cross, X)"
-
-    JSON_PATTERN_SECTION = "\n--- {pattern_key} ---"
+    JSON_REASON_UNDECIDED = "동점(UNDECIDED) 처리 규칙에 따라 FAIL"
+    JSON_REASON_MISMATCH = "예측값({predicted})과 expected({expected}) 불일치"
     JSON_REQUIRED_FILTER_MISSING = "필수 필터 누락: {size_key}"
+    
+    JSON_PATTERN_SECTION = "\n--- {pattern_key} ---"
     JSON_SCORE_CROSS = "Cross 점수: {score}"
     JSON_SCORE_X = "X 점수: {score}"
     JSON_AVG_TIME = "평균 시간: {ms:.6f} ms"
