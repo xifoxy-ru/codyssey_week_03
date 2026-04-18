@@ -4,6 +4,7 @@ from app.input_parser import MatrixInputHandler
 from app.judge import ScoreJudge
 from app.json_runner import JsonPatternRunner
 from app.mac import MacCalculator
+from app.benchmark import MacBenchmark
 
 
 def print_menu() -> None:
@@ -16,6 +17,8 @@ def run_user_input_mode() -> None:
     handler = MatrixInputHandler()
     calculator = MacCalculator()
     judge = ScoreJudge()
+    benchmark = MacBenchmark()
+
 
     print(Text.USER_INPUT_SECTION)
 
@@ -26,11 +29,17 @@ def run_user_input_mode() -> None:
     score_a = calculator.mac(pattern, filter_a)
     score_b = calculator.mac(pattern, filter_b)
     result = judge.judge_scores(score_a, score_b)
+    average_ms = benchmark.benchmark_mac(pattern, filter_a)
+
 
     print(Text.RESULT_SECTION)
     print(Text.RESULT_SCORE_A.format(score=score_a))
     print(Text.RESULT_SCORE_B.format(score=score_b))
     print(Text.RESULT_JUDGE.format(result=result))
+    print(Text.INPUT_AVG_TIME.format(
+    repeat=AppConfig.DEFAULT_BENCHMARK_REPEAT,
+    ms=average_ms,
+    ))
 
 
 def run_json_mode() -> None:
