@@ -217,22 +217,28 @@ class JsonPatternRunner:
 
             grouped.setdefault(size, []).append(average_ms)
 
-        if not grouped:
-            return
-
         print(Text.BENCHMARK_SECTION)
         print(Text.BENCHMARK_HEADER)
 
-        for size in sorted(grouped):
-            avg_ms = sum(grouped[size]) / len(grouped[size])
+        for size in AppConfig.BENCHMARK_TABLE_SIZES:
             operation_count = size * size
-            print(
-                Text.BENCHMARK_ROW.format(
-                    size=size,
-                    avg_ms=avg_ms,
-                    operation_count=operation_count,
+
+            if size in grouped:
+                avg_ms = sum(grouped[size]) / len(grouped[size])
+                print(
+                    Text.BENCHMARK_ROW.format(
+                        size=size,
+                        avg_ms=avg_ms,
+                        operation_count=operation_count,
+                    )
                 )
-            )
+            else:
+                print(
+                    Text.BENCHMARK_ROW_EMPTY.format(
+                        size=size,
+                        operation_count=operation_count,
+                    )
+                )
 
     def run(self) -> None:
         try:
