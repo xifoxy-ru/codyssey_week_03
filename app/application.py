@@ -17,7 +17,7 @@ class MiniNpuApp:
 
     def run(self) -> None:
         self._print_menu()
-        choice = input(Text.MENU_PROMPT).strip()
+        choice = self._safe_input(Text.MENU_PROMPT).strip()
 
         if choice == str(MenuOption.USER_INPUT):
             self._run_user_input_mode()
@@ -28,6 +28,14 @@ class MiniNpuApp:
             return
 
         print(Text.MENU_INVALID)
+
+    def _safe_input(self, prompt: str = "") -> str:
+        while True:
+            try:
+                return input(prompt)
+            except (KeyboardInterrupt, EOFError):
+                print()
+                print(Text.INPUT_INTERRUPTED_RETRY)
 
     def _print_menu(self) -> None:
         print(Text.APP_TITLE)
@@ -45,11 +53,11 @@ class MiniNpuApp:
             print(Text.BLOCK_LINE)
 
             filter_a = self.handler.prompt_matrix(
-                Text.FILTER_A,
+                "필터 A",
                 AppConfig.DEFAULT_INPUT_SIZE,
             )
             filter_b = self.handler.prompt_matrix(
-                Text.FILTER_B,
+                "필터 B",
                 AppConfig.DEFAULT_INPUT_SIZE,
             )
 
@@ -62,7 +70,7 @@ class MiniNpuApp:
         print(Text.BLOCK_LINE)
 
         pattern = self.handler.prompt_matrix(
-            Text.PATTERN,
+            "패턴",
             AppConfig.DEFAULT_INPUT_SIZE,
         )
 
@@ -102,14 +110,14 @@ class MiniNpuApp:
         print(Text.FILTER_CONFIRM_SECTION)
         print(Text.BLOCK_LINE)
 
-        print(Text.FILTER_A)
+        print("필터 A")
         self._print_matrix(filter_a)
         print()
-        print(Text.FILTER_B)
+        print("필터 B")
         self._print_matrix(filter_b)
 
         while True:
-            choice = input(Text.FILTER_CONFIRM_PROMPT).strip().lower()
+            choice = self._safe_input(Text.FILTER_CONFIRM_PROMPT).strip().lower()
 
             if choice in InputValue.YES:
                 return True
