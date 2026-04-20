@@ -10,6 +10,14 @@ class MatrixInputHandler:
     def __init__(self) -> None:
         self.validator = MatrixValidator()
 
+    def safe_input(self, prompt: str = "") -> str:
+        while True:
+            try:
+                return input(prompt)
+            except (KeyboardInterrupt, EOFError):
+                print()
+                print(Text.INPUT_INTERRUPTED_RETRY)
+
     def parse_matrix_from_lines(
         self,
         lines: list[str],
@@ -50,7 +58,7 @@ class MatrixInputHandler:
             lines: list[str] = []
 
             for _ in range(size):
-                lines.append(input().rstrip())
+                lines.append(self.safe_input().rstrip())
 
             try:
                 return self.parse_matrix_from_lines(lines, size)
