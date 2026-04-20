@@ -10,6 +10,9 @@ class AppConfig:
     MILLISECONDS = 1000
     REQUIRED_FILTER_SIZES = ("size_5", "size_13", "size_25")
 
+class InputValue:
+    YES = ("y", "yes")
+    NO = ("n", "no")
 
 class JsonKey:
     """JSON 구조와 키 관련 상수"""
@@ -110,6 +113,13 @@ class Text:
 
     BENCHMARK_REPEAT_ERROR = "repeat는 1 이상이어야 합니다."
     LABEL_INVALID_ERROR = "지원하지 않는 라벨입니다: {label}"
+
+    FILTER_CONFIRM_SECTION = "# [1-1] 필터 확인"
+    FILTER_CONFIRM_PROMPT = "이 필터로 진행할까요? (y/n): "
+    FILTER_CONFIRM_INVALID = "y 또는 n만 입력해주세요."
+    FILTER_A = "필터 A"
+    FILTER_B = "필터 B"
+    PATTERN = "패턴"
 
     BLOCK_LINE = "#---------------------------------------"
     MODE_SECTION = "[모드 선택]\n"
