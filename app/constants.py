@@ -57,6 +57,7 @@ class Text:
     RESULT_SCORE_A = "A 점수: {score}"
     RESULT_SCORE_B = "B 점수: {score}"
     RESULT_JUDGE = "판정: {result}"
+    RESULT_UNDECIDED = "판정: 판정 불가 (|A-B| < {epsilon})"
 
     INPUT_MATRIX_PROMPT = "\n{name} ({size}줄 입력, 공백 구분)"
     INPUT_RETRY = "다시 입력해주세요."

@@ -1,4 +1,4 @@
-from app.constants import AppConfig, InputValue, Text
+from app.constants import AppConfig, InputValue, LabelValue, Text
 from app.enums import MenuOption
 from app.input_parser import MatrixInputHandler
 from app.judge import ScoreJudge
@@ -91,7 +91,11 @@ def run_user_input_mode() -> None:
             ms=average_ms,
         )
     )
-    print(Text.RESULT_JUDGE.format(result=result))
+
+    if result == LabelValue.UNDECIDED:
+        print(Text.RESULT_UNDECIDED.format(epsilon=AppConfig.EPSILON))
+    else:
+        print(Text.RESULT_JUDGE.format(result=result))
 
 def run_json_mode() -> None:
     runner = JsonPatternRunner()
