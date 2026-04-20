@@ -1,4 +1,4 @@
-from app.constants import AppConfig, Text
+from app.constants import AppConfig, InputValue, Text
 from app.enums import MenuOption
 from app.input_parser import MatrixInputHandler
 from app.judge import ScoreJudge
@@ -13,6 +13,41 @@ def print_menu() -> None:
     print(Text.MENU_USER_INPUT)
     print(Text.MENU_JSON_ANALYSIS)
 
+def format_cell(value: float) -> str:
+    return str(int(value)) if float(value).is_integer() else str(value)
+
+
+def print_matrix(matrix: list[list[float]]) -> None:
+    for row in matrix:
+        print(" ".join(format_cell(value) for value in row))
+
+
+def confirm_filters(
+    filter_a: list[list[float]],
+    filter_b: list[list[float]],
+) -> bool:
+    print()
+    print(Text.BLOCK_LINE)
+    print(Text.FILTER_CONFIRM_SECTION)
+    print(Text.BLOCK_LINE)
+
+    print(Text.FILTER_A)
+    print_matrix(filter_a)
+    print()
+    print(Text.FILTER_B)
+    print_matrix(filter_b)
+
+    while True:
+        choice = input(Text.FILTER_CONFIRM_PROMPT).strip().lower()
+
+        if choice in InputValue.YES:
+            return True
+
+        if choice in InputValue.NO:
+            return False
+
+        print(Text.FILTER_CONFIRM_INVALID)
+
 
 def run_user_input_mode() -> None:
     handler = MatrixInputHandler()
@@ -20,31 +55,42 @@ def run_user_input_mode() -> None:
     judge = ScoreJudge()
     benchmark = MacBenchmark()
 
-    print(f'\n{Text.BLOCK_LINE}')
-    print(Text.FILTER_INPUT_SECTION)
-    print(Text.BLOCK_LINE)
-    filter_a = handler.prompt_matrix("필터 A", AppConfig.DEFAULT_INPUT_SIZE)
-    filter_b = handler.prompt_matrix("필터 B", AppConfig.DEFAULT_INPUT_SIZE)
+    while True:
+        print()
+        print(Text.BLOCK_LINE)
+        print(Text.FILTER_INPUT_SECTION)
+        print(Text.BLOCK_LINE)
 
-    print(f'\n{Text.BLOCK_LINE}')
+        filter_a = handler.prompt_matrix(Text.FILTER_A, AppConfig.DEFAULT_INPUT_SIZE)
+        filter_b = handler.prompt_matrix(Text.FILTER_B, AppConfig.DEFAULT_INPUT_SIZE)
+
+        if confirm_filters(filter_a, filter_b):
+            break
+
+    print()
+    print(Text.BLOCK_LINE)
     print(Text.PATTERN_INPUT_SECTION)
-    print(f'{Text.BLOCK_LINE}')
-    pattern = handler.prompt_matrix("패턴", AppConfig.DEFAULT_INPUT_SIZE)
+    print(Text.BLOCK_LINE)
+
+    pattern = handler.prompt_matrix(Text.PATTERN, AppConfig.DEFAULT_INPUT_SIZE)
 
     score_a = calculator.mac(pattern, filter_a)
     score_b = calculator.mac(pattern, filter_b)
     result = judge.judge_scores(score_a, score_b)
     average_ms = benchmark.benchmark_mac(pattern, filter_a)
 
-    print(f'\n{Text.BLOCK_LINE}')
+    print()
+    print(Text.BLOCK_LINE)
     print(Text.MAC_RESULT_SECTION)
-    print(f'{Text.BLOCK_LINE}\n')
+    print(Text.BLOCK_LINE)
     print(Text.RESULT_SCORE_A.format(score=score_a))
     print(Text.RESULT_SCORE_B.format(score=score_b))
-    print(Text.INPUT_AVG_TIME.format(
-        repeat=AppConfig.DEFAULT_BENCHMARK_REPEAT,
-        ms=average_ms,
-    ))
+    print(
+        Text.INPUT_AVG_TIME.format(
+            repeat=AppConfig.DEFAULT_BENCHMARK_REPEAT,
+            ms=average_ms,
+        )
+    )
     print(Text.RESULT_JUDGE.format(result=result))
 
 def run_json_mode() -> None:
